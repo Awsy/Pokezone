@@ -16,6 +16,7 @@ struct ContentView: View {
 		animation: .default)
 	
 	private var pokemons: FetchedResults<Pokemon>
+	let fetchPokemons = FetchingService()
 	
 	var body: some View {
 		NavigationView {
@@ -35,11 +36,39 @@ struct ContentView: View {
 				}
 				ToolbarItem {
 					Button("Add Item", systemImage: "plus") {
-						
+						getPokemons()
 					}
 				}
 			}
 			
+		}
+	}
+	
+	func getPokemons() {
+		Task {
+			for id in 1..<200 {
+				do {
+					let fetchedPokemons = try await fetchPokemons.fetchPokemons(id)
+					let pokemon = Pokemon(context: viewContext)
+					
+					pokemon.id = fetchedPokemons.id
+					pokemon.name = fetchedPokemons.name
+					pokemon.types = fetchedPokemons.types
+					pokemon.attack = fetchedPokemons.attack
+					pokemon.defense = fetchedPokemons.defense
+					pokemon.hp = fetchedPokemons.hp
+					pokemon.specialAttack = fetchedPokemons.specialAttack
+					pokemon.specialDefense = fetchedPokemons.specialDefense
+					pokemon.speed = fetchedPokemons.speed
+					pokemon.shiny = fetchedPokemons.shiny
+					pokemon.sprite = fetchedPokemons.sprite
+					
+					try viewContext.save()
+					
+				} catch {
+					print(error)
+				}
+			}
 		}
 	}
 }
