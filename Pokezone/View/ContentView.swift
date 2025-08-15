@@ -63,7 +63,7 @@ struct ContentView: View {
 								} placeholder: {
 									ProgressView()
 								}
-								.frame(width: 100, height: 100)
+								.frame(width: 110, height: 110)
 								
 								VStack(alignment: .leading) {
 									
@@ -74,7 +74,6 @@ struct ContentView: View {
 										if pokemon.favorite {
 											Image(systemName: "star.fill")
 												.foregroundStyle(.yellow)
-												.padding()
 										}
 									}
 									
@@ -93,8 +92,23 @@ struct ContentView: View {
 								}
 								
 							}
+							.swipeActions(edge: .leading) {
+								Button(pokemon.favorite ? "Remove from Favorites" : "Add to Favorites", systemImage: "star") {
+									pokemon.favorite.toggle()
+									do {
+										try viewContext.save()
+									
+									} catch {
+										print(error)
+									}
+								}
+								.tint(pokemon.favorite ? .gray : .yellow)
+							}
 						}
+						.padding()
 					}
+					.background(.clear.mix(with: .indigo, by: 0.3))
+					.clipShape(.rect(cornerRadius: 10))
 					
 				}
 				.navigationTitle("Pokezone")
@@ -157,10 +171,6 @@ struct ContentView: View {
 					pokemon.speed = fetchedPokemons.speed
 					pokemon.shiny = fetchedPokemons.shiny
 					pokemon.sprite = fetchedPokemons.sprite
-					
-					if pokemon.id % 2 == 0 {
-						pokemon.favorite = true
-					}
 					
 					try viewContext.save()
 					
