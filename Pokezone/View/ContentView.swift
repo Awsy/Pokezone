@@ -11,6 +11,8 @@ import CoreData
 struct ContentView: View {
 	@Environment(\.managedObjectContext) private var viewContext
 	
+	@FetchRequest<Pokemon>(sortDescriptors: []) private var allPokemons
+	
 	@FetchRequest<Pokemon>(sortDescriptors: [SortDescriptor(\.id)],
 						   animation: .default
 	) private var pokemons
@@ -36,7 +38,7 @@ struct ContentView: View {
 	
 	var body: some View {
 		
-		if pokemons.isEmpty {
+		if allPokemons.isEmpty {
 			ContentUnavailableView {
 				Label("No Pokemon", image: .nopokemon)
 			} description: {
@@ -121,19 +123,8 @@ struct ContentView: View {
 					pokemons.nsPredicate = predicate
 				}
 				.navigationDestination(for: Pokemon.self) { pokemon in
-					HStack {
-						AsyncImage(url: pokemon.sprite) { image in
-							image
-								.resizable()
-								.scaledToFit()
-							
-						} placeholder: {
-							ProgressView()
-						}
-						.frame(width: 100, height: 100)
-						
-						Text(pokemon.name ?? "No Name found")
-					}
+					PokemonDetailsView()
+						.environmentObject(pokemon)
 				}
 				.toolbar {
 					ToolbarItem(placement: .navigationBarTrailing) {
