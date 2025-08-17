@@ -57,15 +57,23 @@ struct ContentView: View {
 					Section {
 						ForEach(pokemons) { pokemon in
 							NavigationLink(value: pokemon) {
-								AsyncImage(url: pokemon.sprite) { image in
-									image
+								
+								if pokemon.sprite == nil {
+									AsyncImage(url: pokemon.spriteURL) { image in
+										image
+											.resizable()
+											.scaledToFit()
+										
+									} placeholder: {
+										ProgressView()
+									}
+									.frame(width: 110, height: 110)
+								} else {
+									pokemon.spriteImage
 										.resizable()
 										.scaledToFit()
-									
-								} placeholder: {
-									ProgressView()
+										.frame(width: 110, height: 110)
 								}
-								.frame(width: 110, height: 110)
 								
 								VStack(alignment: .leading) {
 									
@@ -160,14 +168,30 @@ struct ContentView: View {
 					pokemon.specialAttack = fetchedPokemons.specialAttack
 					pokemon.specialDefense = fetchedPokemons.specialDefense
 					pokemon.speed = fetchedPokemons.speed
-					pokemon.shiny = fetchedPokemons.shiny
-					pokemon.sprite = fetchedPokemons.sprite
+					pokemon.shinyURL = fetchedPokemons.shinyURL
+					pokemon.spriteURL = fetchedPokemons.spriteURL
 					
 					try viewContext.save()
 					
 				} catch {
 					print(error)
 				}
+			}
+			storeImages()
+		}
+	}
+	
+	func storeImages() {
+		Task {
+			do {
+				for pokemon in allPokemons {
+					pokemon.sprite = try await URLSession.shared.data(from: pokemon.spriteURL!).0
+					pokemon.shiny = try await URLSession.shared.data(from: pokemon.shinyURL!).0
+					
+					try viewContext.save()
+				}
+			} catch {
+				print(error)
 			}
 		}
 	}

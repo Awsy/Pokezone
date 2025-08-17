@@ -18,20 +18,30 @@ struct PokemonDetailsView: View {
 		ScrollView {
 			
 			ZStack {
-				Image(.rockgroundsteelfightingghostdarkpsychic)
+				Image(pokemon.background)
 					.resizable()
 					.scaledToFit()
 					.shadow(color: .black, radius: 5)
 				
-				AsyncImage(url: pokemon.sprite) { image in
-					image
+				if pokemon.sprite == nil || pokemon.shiny == nil {
+					AsyncImage(url: isShiny ? pokemon.shinyURL : pokemon.spriteURL) { image in
+						image
+							.interpolation(.none)
+							.resizable()
+							.scaledToFit()
+							.padding(.top, 30)
+							.shadow(color: .white, radius: 2)
+					} placeholder: {
+						ProgressView()
+					}
+				} else {
+					(isShiny ? pokemon.shinyImage : pokemon.spriteImage)
 						.interpolation(.none)
 						.resizable()
 						.scaledToFit()
 						.padding(.top, 30)
 						.shadow(color: .white, radius: 2)
-				} placeholder: {
-					ProgressView()
+					
 				}
 			}
 			
@@ -66,9 +76,27 @@ struct PokemonDetailsView: View {
 			}
 			.padding()
 			
+			Text("Stats")
+				.font(.title)
+				.padding(.bottom, -5)
 			
+			PokemonStatsView(pokemon: pokemon)
 		}
 		.navigationTitle(pokemon.name?.capitalized ?? "Unknown Pokemon")
+		.toolbar {
+			ToolbarItem(placement: .topBarTrailing) {
+				Button {
+					isShiny.toggle()
+				} label: {
+					Image(systemName: isShiny ?
+							"wand.and.stars" :
+							"wand.and.stars.inverse")
+					.tint(isShiny ? .yellow : .primary)
+				}
+				
+				
+			}
+		}
 	}
 }
 
